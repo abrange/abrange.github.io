@@ -1,39 +1,47 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+  {%- include head.html -%}
+  <body>
+    {%- include header.html -%}
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="home">
 
-<div class="home">
+          {%- if site.author.avatar -%}
+          <img src="{{ site.author.avatar | relative_url }}"
+               alt="{{ site.author.name | escape }}"
+               style="width:144px;height:144px;border-radius:50%;object-fit:cover;object-position:center top;display:block;margin-bottom:1rem;">
+          {%- endif -%}
 
-  {%- if site.author.avatar -%}
-  <img src="{{ site.author.avatar | relative_url }}"
-       alt="{{ site.author.name | escape }}"
-       style="width:144px;height:144px;border-radius:50%;object-fit:cover;object-position:center top;display:block;margin-bottom:1rem;">
-  {%- endif -%}
+          {%- if page.title -%}
+          <h1 class="page-heading">{{ page.title }}</h1>
+          {%- endif -%}
 
-  {%- if page.title -%}
-  <h1 class="page-heading">{{ page.title }}</h1>
-  {%- endif -%}
+          {{ content }}
 
-  {{ content }}
+          {%- if site.posts.size > 0 -%}
+          <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
+          <ul class="post-list">
+            {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+            {%- for post in site.posts -%}
+            <li>
+              <span class="post-meta">{{ post.date | date: date_format }}</span>
+              <h3>
+                <a class="post-link" href="{{ post.url | relative_url }}">
+                  {{ post.title | escape }}
+                </a>
+              </h3>
+              {%- if site.show_excerpts -%}
+                {{ post.excerpt }}
+              {%- endif -%}
+            </li>
+            {%- endfor -%}
+          </ul>
+          {%- endif -%}
 
-  {%- if site.posts.size > 0 -%}
-  <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
-  <ul class="post-list">
-    {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
-    {%- for post in site.posts -%}
-    <li>
-      <span class="post-meta">{{ post.date | date: date_format }}</span>
-      <h3>
-        <a class="post-link" href="{{ post.url | relative_url }}">
-          {{ post.title | escape }}
-        </a>
-      </h3>
-      {%- if site.show_excerpts -%}
-        {{ post.excerpt }}
-      {%- endif -%}
-    </li>
-    {%- endfor -%}
-  </ul>
-  {%- endif -%}
-
-</div>
+        </div>
+      </div>
+    </main>
+    {%- include footer.html -%}
+  </body>
+</html>
