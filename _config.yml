@@ -1,21 +1,27 @@
 title: Alvaro Brange
 description: Staff Software Engineer — Distributed Systems, Rust & Python, AI Infrastructure
-author: Alvaro Brange
-email: abrange@gmail.com
+author:
+  name: Alvaro Brange
+  email: abrange@gmail.com
+  picture: /assets/img/AlvaroProfile.jpg  # drop your photo here (see below)
 
-theme: minima
+# Use latest Minima (v3) for social icons + dark mode support
+remote_theme: jekyll/minima
+# Remove the local `theme: minima` line — remote_theme takes precedence
 
 permalink: /:year/:month/:day/:title/
 
 minima:
-  skin: classic  # options: classic, dark, solarized, solarized-dark
+  skin: auto  # auto = respects user's OS dark/light preference
 
-# Social links (shown in footer)
-github_username: abrange
+  social_links:
+    - { platform: github,    user_url: "https://github.com/abrange" }
+    - { platform: linkedin,  user_url: "https://www.linkedin.com/in/abrange/" }
+    - { platform: x,         user_url: "https://x.com/abrange" }
 
 # Build settings
 markdown: kramdown
-highlighter: rouge  # syntax highlighting for code blocks
+highlighter: rouge
 
 # Exclude from build
 exclude:
@@ -24,10 +30,7 @@ exclude:
   - README.md
   - .gitignore
 
-# Pagination (optional, requires jekyll-paginate plugin)
-# paginate: 5
-# paginate_path: "/page:num/"
-
 plugins:
-  - jekyll-feed       # generates /feed.xml for RSS readers
-  - jekyll-seo-tag    # adds meta tags for SEO automatically
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-remote-theme   # required for remote_theme to work on GitHub Pages
