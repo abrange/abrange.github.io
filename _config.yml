@@ -3,11 +3,10 @@ description: Staff Software Engineer — Distributed Systems, Rust & Python, AI 
 author:
   name: Alvaro Brange
   email: abrange@gmail.com
-  picture: /assets/img/AlvaroProfile.jpg  # drop your photo here (see below)
+  avatar: /assets/img/AlvaroProfile.jpg
 
-# Use latest Minima (v3) for social icons + dark mode support
-remote_theme: jekyll/minima
-# Remove the local `theme: minima` line — remote_theme takes precedence
+# Pin to Minima v3 master to guarantee social icons + dark mode support
+remote_theme: jekyll/minima@master
 
 permalink: /:year/:month/:day/:title/
 
@@ -17,7 +16,7 @@ minima:
   social_links:
     - { platform: github,    user_url: "https://github.com/abrange" }
     - { platform: linkedin,  user_url: "https://www.linkedin.com/in/abrange/" }
-    - { platform: x,         user_url: "https://x.com/abrange" }
+    - { platform: twitter,   user_url: "https://x.com/abrange" }
 
 # Build settings
 markdown: kramdown
