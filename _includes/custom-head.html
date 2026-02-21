@@ -1,0 +1,10 @@
+<link rel="stylesheet" href="/assets/css/theme-toggle.css">
+<script>
+  // Apply saved theme BEFORE first paint to avoid flash
+  (function () {
+    var t = localStorage.getItem('theme');
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+    }
+  })();
+</script>

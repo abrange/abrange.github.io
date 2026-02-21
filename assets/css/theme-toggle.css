@@ -1,0 +1,66 @@
+/* ── Theme toggle button ── */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--minima-border-color-01, #ccc);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 8px;
+  margin-left: 12px;
+  vertical-align: middle;
+  transition: border-color 0.2s;
+}
+.theme-toggle:hover {
+  border-color: var(--minima-brand-color, #888);
+}
+
+/* ── Force LIGHT mode ── */
+html[data-theme="light"] {
+  --minima-brand-color:           #818181;
+  --minima-brand-color-light:     #d4d4d4;
+  --minima-brand-color-dimmed:    #6e6e6e;
+  --minima-brand-color-dark:      #616161;
+  --minima-site-title-color:      #424242;
+  --minima-heading-color:         #111111;
+  --minima-text-color:            #424242;
+  --minima-background-color:      #fdfdfd;
+  --minima-code-background-color: #f6f8fa;
+  --minima-link-base-color:       #1e69d8;
+  --minima-link-visited-color:    #1652ab;
+  --minima-link-hover-color:      #111111;
+  --minima-border-color-01:       #d4d4d4;
+  --minima-border-color-02:       #c8c8c8;
+  --minima-border-color-03:       #616161;
+  --minima-table-text-color:      #363636;
+  --minima-table-zebra-color:     #f0f0f0;
+  --minima-table-header-bg-color: #e8e8e8;
+  --minima-table-header-border:   #d0d0d0;
+  --minima-table-border-color:    #d4d4d4;
+  color-scheme: light;
+}
+
+/* ── Force DARK mode ── */
+html[data-theme="dark"] {
+  --minima-brand-color:           #999999;
+  --minima-brand-color-light:     #a3a3a3;
+  --minima-brand-color-dimmed:    #8a8a8a;
+  --minima-brand-color-dark:      #373737;
+  --minima-site-title-color:      #a3a3a3;
+  --minima-heading-color:         #bbbbbb;
+  --minima-text-color:            #9c9c9c;
+  --minima-background-color:      #181818;
+  --minima-code-background-color: #222222;
+  --minima-link-base-color:       #5691cd;
+  --minima-link-visited-color:    #80bbff;
+  --minima-link-hover-color:      #a0a0a0;
+  --minima-border-color-01:       #373737;
+  --minima-border-color-02:       #a3a3a3;
+  --minima-border-color-03:       #999999;
+  --minima-table-text-color:      #9c9c9c;
+  --minima-table-zebra-color:     #1f1f1f;
+  --minima-table-header-bg-color: #272727;
+  --minima-table-header-border:   #2d2d2d;
+  --minima-table-border-color:    #373737;
+  color-scheme: dark;
+}
