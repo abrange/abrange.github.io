@@ -1,0 +1,33 @@
+title: Alvaro Brange
+description: Staff Software Engineer — Distributed Systems, Rust & Python, AI Infrastructure
+author: Alvaro Brange
+email: abrange@gmail.com
+
+theme: minima
+
+permalink: /:year/:month/:day/:title/
+
+minima:
+  skin: classic  # options: classic, dark, solarized, solarized-dark
+
+# Social links (shown in footer)
+github_username: abrange
+
+# Build settings
+markdown: kramdown
+highlighter: rouge  # syntax highlighting for code blocks
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .gitignore
+
+# Pagination (optional, requires jekyll-paginate plugin)
+# paginate: 5
+# paginate_path: "/page:num/"
+
+plugins:
+  - jekyll-feed       # generates /feed.xml for RSS readers
+  - jekyll-seo-tag    # adds meta tags for SEO automatically
