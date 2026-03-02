@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RaftyStore: Raft Snapshots, InstallSnapshot, and Two Subtle Bugs"
+title: "Raft from Scratch: Snapshots, InstallSnapshot, and Bugs"
 date: 2026-02-28
 categories: distributed-systems python
 tags: [raft, consensus, distributed-systems, python, grpc, snapshots]
 lang: en
 translation: /2026/02/28/raftystore-raft-snapshots-and-bugs-es/
+image: /assets/img/raftystore-og.png
 ---
 
 *[Leer en español]({{ page.translation }})*

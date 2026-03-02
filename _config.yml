@@ -1,5 +1,9 @@
 title: Alvaro Brange
 description: Staff Software Engineer — Distributed Systems, Rust & Python, AI Infrastructure
+url: https://abrange.dev
+
+# Open Graph / Twitter Card image for link previews (X, LinkedIn, etc.)
+image: /assets/img/AlvaroProfile.jpg
 author:
   name: Alvaro Brange
   email: abrange@gmail.com
