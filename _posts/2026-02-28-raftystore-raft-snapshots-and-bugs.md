@@ -10,7 +10,7 @@ translation: /2026/02/28/raftystore-raft-snapshots-and-bugs-es/
 
 *[Leer en español]({{ page.translation }})*
 
-I built [RaftyStore](https://github.com/abrange/raftystore) — a distributed key-value store in Python using the [Raft consensus algorithm](https://raft.github.io/raft.pdf). It includes leader election, log replication, and log compaction via snapshots. Along the way I ran into two tricky bugs that only appeared when snapshots and failing peers were involved. This post describes the flows, then the bugs and fixes.
+I built [RaftyStore](https://github.com/abrange/raftystore) — a distributed key-value store in Python using the [Raft consensus algorithm](https://raft.github.io/raft.pdf) (Ongaro & Ousterhout, 2014). It includes leader election, log replication, and log compaction via snapshots. Along the way I ran into two tricky bugs that only appeared when snapshots and failing peers were involved. This post describes the flows, then the bugs and fixes.
 
 ---
 
@@ -29,6 +29,17 @@ Raft is a consensus algorithm for replicated state machines. A cluster of nodes 
 - **InstallSnapshot** — Used when a follower’s log is behind and the leader has truncated it (snapshot)
 
 **Log compaction:** To bound log size, the leader periodically snapshots applied entries into a single state, truncates the log, and can send that snapshot to lagging followers via InstallSnapshot.
+
+---
+
+## Where Raft is Used
+
+Raft has been widely adopted in production systems:
+
+- **[etcd](https://etcd.io/)** — Distributed key-value store used as the backbone of [Kubernetes](https://kubernetes.io/) for cluster coordination and configuration.
+- **[Consul](https://www.consul.io/)** — Service mesh and service discovery by HashiCorp, uses Raft for leader election and state replication.
+- **[CockroachDB](https://www.cockroachlabs.com/)** — Distributed SQL database that runs many Raft groups (one per data range) via its MultiRaft layer.
+- **[TiKV](https://tikv.org/)** — Distributed transactional key-value store, part of the TiDB ecosystem.
 
 ---
 
@@ -157,5 +168,24 @@ With this change, when A is down the RPC raises, `next_index` stays at 8, and th
 | 2 | `grpc_transport.install_snapshot` | Caught `RpcError` and returned a result | Propagate exception so failure is visible to the node |
 
 Both bugs only surfaced with snapshots and failing or lagging peers — the kind of edge cases that are easy to miss during normal operation.
+
+---
+
+## Recommendations and Lessons Learned
+
+**Logical vs. physical indexes.** Keep the distinction clear from the start. Most Raft logic refers to *logical* indexes (1, 2, 3, …) that survive log truncation and snapshots. Only in a few places — e.g. mapping to array positions after a snapshot — do you deal with *physical* indexes into the in-memory log. Mixing them up was my initial headache; once I internalized that we almost always mean logical index, the design became much cleaner.
+
+**gRPC over JSON.** Using gRPC for Raft RPCs (instead of JSON over HTTP) gives typed requests/responses, efficient binary serialization, and built-in streaming. It also forces you to handle connection failures and timeouts explicitly, which avoids subtle bugs like treating RPC errors as success.
+
+**Design choices in RaftyStore.** Some decisions here differ from a textbook Raft setup:
+
+- **HTTP redirect to leader** — When a client writes to a follower, the API returns 307 with the leader’s URL instead of proxying the request. Clients can cache the leader for lower latency.
+- **Single JSON file per log and snapshot** — The log and snapshot each live in one JSON file (e.g. `log.json`, `snapshot.json`) instead of separate segment files. Simpler for a minimal implementation, but not ideal for very large logs.
+
+**Key concepts from this exercise.** Consensus is inherently about surviving failures: crashes, network partitions, slow peers. Persist critical state before returning; don’t treat “success” unless you have a clear signal; and be careful when crossing the boundary between in-memory log and snapshot.
+
+**Start with a multiprocess design.** Running all nodes in a single process is tempting for early debugging, but it hides real concurrency and failure behavior. Starting with one process per node (e.g. multiple terminals or a simple script) makes timeouts, network failures, and leader changes feel real from day one and reduces surprises later.
+
+---
 
 RaftyStore is on GitHub: [github.com/abrange/raftystore](https://github.com/abrange/raftystore).

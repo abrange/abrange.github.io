@@ -10,7 +10,7 @@ translation: /2026/02/28/raftystore-raft-snapshots-and-bugs/
 
 *[Read in English]({{ page.translation }})*
 
-Construí [RaftyStore](https://github.com/abrange/raftystore) — un almacén clave-valor distribuido en Python usando el [algoritmo de consenso Raft](https://raft.github.io/raft.pdf). Incluye elección de líder, replicación de log y compactación mediante snapshots. En el camino me topé con dos bugs complicados que solo aparecían cuando entraban en juego snapshots y peers caídos. Este post describe los flujos y luego los bugs y sus correcciones.
+Construí [RaftyStore](https://github.com/abrange/raftystore) — un almacén clave-valor distribuido en Python usando el [algoritmo de consenso Raft](https://raft.github.io/raft.pdf) (Ongaro & Ousterhout, 2014). Incluye elección de líder, replicación de log y compactación mediante snapshots. En el camino me topé con dos bugs complicados que solo aparecían cuando entraban en juego snapshots y peers caídos. Este post describe los flujos y luego los bugs y sus correcciones.
 
 ---
 
@@ -29,6 +29,17 @@ Raft es un algoritmo de consenso para máquinas de estado replicadas. Un clúste
 - **InstallSnapshot** — Usado cuando el log del seguidor está retrasado y el líder lo ha truncado (snapshot)
 
 **Compactación de log:** Para limitar el tamaño del log, el líder periódicamente hace snapshot de las entradas aplicadas en un único estado, trunca el log y puede enviar ese snapshot a seguidores retrasados vía InstallSnapshot.
+
+---
+
+## Dónde se usa Raft
+
+Raft está ampliamente adoptado en sistemas de producción:
+
+- **[etcd](https://etcd.io/)** — Almacén clave-valor distribuido que sirve de columna vertebral de [Kubernetes](https://kubernetes.io/) para coordinación y configuración del clúster.
+- **[Consul](https://www.consul.io/)** — Service mesh y descubrimiento de servicios de HashiCorp; usa Raft para elección de líder y replicación de estado.
+- **[CockroachDB](https://www.cockroachlabs.com/)** — Base de datos SQL distribuida que ejecuta muchos grupos Raft (uno por rango de datos) a través de su capa MultiRaft.
+- **[TiKV](https://tikv.org/)** — Almacén clave-valor transaccional distribuido, parte del ecosistema TiDB.
 
 ---
 
@@ -157,5 +168,24 @@ Con este cambio, cuando A está caído el RPC lanza excepción, `next_index` se 
 | 2 | `grpc_transport.install_snapshot` | Capturaba `RpcError` y devolvía resultado | Propagar excepción para que el fallo sea visible al nodo |
 
 Ambos bugs solo aparecieron con snapshots y peers fallando o retrasados — el tipo de casos límite fáciles de pasar por alto en operación normal.
+
+---
+
+## Recomendaciones y lecciones aprendidas
+
+**Índices lógicos vs. físicos.** Conviene tener clara esta distinción desde el principio. La mayor parte de la lógica de Raft habla de índices *lógicos* (1, 2, 3, …) que sobreviven al truncado del log y a los snapshots. Solo en unos pocos sitios — por ejemplo, al mapear a posiciones del array tras un snapshot — manejas índices *físicos* en el log en memoria. Confundirlos fue mi primer dolor de cabeza; una vez internalicé que casi siempre hablamos de índice lógico, el diseño cobró más sentido.
+
+**gRPC en lugar de JSON.** Usar gRPC para los RPCs de Raft (en vez de JSON sobre HTTP) proporciona requests/responses tipados, serialización binaria eficiente y streaming integrado. Además, obliga a manejar explícitamente fallos de conexión y timeouts, lo que evita bugs sutiles como tratar errores de RPC como éxito.
+
+**Decisiones de diseño en RaftyStore.** Algunas elecciones aquí se apartan de un Raft estándar:
+
+- **Redirect HTTP al líder** — Cuando un cliente escribe a un seguidor, la API devuelve 307 con la URL del líder en lugar de hacer proxy de la petición. Los clientes pueden cachear el líder para menor latencia.
+- **Un único archivo JSON por log y snapshot** — El log y el snapshot viven en un solo archivo JSON cada uno (p. ej. `log.json`, `snapshot.json`) en vez de archivos de segmento separados. Más simple para una implementación mínima, pero no ideal para logs muy grandes.
+
+**Conceptos clave de este ejercicio.** El consenso trata intrínsecamente de sobrevivir fallos: crashes, particiones de red, peers lentos. Persiste el estado crítico antes de devolver; no asumas "éxito" salvo que tengas una señal clara; y ten cuidado al cruzar la frontera entre log en memoria y snapshot.
+
+**Empieza con diseño multiproceso.** Ejecutar todos los nodos en un solo proceso puede facilitar el debug inicial, pero oculta la concurrencia y el comportamiento ante fallos reales. Empezar con un proceso por nodo (por ejemplo, varias terminales o un script simple) hace que los timeouts, los fallos de red y los cambios de líder se sientan reales desde el primer día y reduce sorpresas después.
+
+---
 
 RaftyStore está en GitHub: [github.com/abrange/raftystore](https://github.com/abrange/raftystore).
