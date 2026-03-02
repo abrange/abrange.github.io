@@ -1,4 +1,18 @@
 <link rel="stylesheet" href="/assets/css/theme-toggle.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('code.language-mermaid').forEach(function(el) {
+      var div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = el.textContent;
+      var wrapper = el.closest('.highlight') || el.closest('pre') || el.parentElement;
+      wrapper.parentNode.replaceChild(div, wrapper);
+    });
+    mermaid.run();
+  });
+</script>
 <script>
   // Apply saved theme BEFORE first paint to avoid flash
   (function () {
