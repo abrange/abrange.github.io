@@ -1,17 +1,43 @@
 <link rel="stylesheet" href="/assets/css/theme-toggle.css">
 <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 <script>
-  mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('code.language-mermaid').forEach(function(el) {
-      var div = document.createElement('div');
-      div.className = 'mermaid';
-      div.textContent = el.textContent;
-      var wrapper = el.closest('.highlight') || el.closest('pre') || el.parentElement;
-      wrapper.parentNode.replaceChild(div, wrapper);
+  (function() {
+    function isDark() {
+      var t = document.documentElement.getAttribute('data-theme');
+      if (t === 'dark') return true;
+      if (t === 'light') return false;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    function renderMermaid() {
+      var theme = isDark() ? 'dark' : 'neutral';
+      mermaid.initialize({ startOnLoad: false, theme: theme });
+      document.querySelectorAll('.mermaid').forEach(function(div) {
+        var src = div.dataset.mermaidContent;
+        if (src) {
+          div.textContent = src;
+          div.removeAttribute('data-processed');
+        }
+      });
+      mermaid.run();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('code.language-mermaid').forEach(function(el) {
+        var div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = el.textContent;
+        div.dataset.mermaidContent = el.textContent;
+        var wrapper = el.closest('.highlight') || el.closest('pre') || el.parentElement;
+        wrapper.parentNode.replaceChild(div, wrapper);
+      });
+      renderMermaid();
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+          if (m.attributeName === 'data-theme') renderMermaid();
+        });
+      });
+      observer.observe(document.documentElement, { attributes: true });
     });
-    mermaid.run();
-  });
+  })();
 </script>
 <script>
   // Apply saved theme BEFORE first paint to avoid flash
